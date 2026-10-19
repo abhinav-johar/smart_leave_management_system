@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, flash, url_for, redirect , jsonify
+from flask import Flask, render_template, request, session, flash, url_for, redirect , jsonify 
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, DateField, PasswordField, RadioField , SelectField
 from wtforms.validators import DataRequired, Length , Regexp , Optional , Email
