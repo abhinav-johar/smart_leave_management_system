@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Leave Management System</title>
+  <link rel="icon" href="{{ url_for('static', filename='LMS.jpg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #0f9d7a;
+      --blue: #2a4d9b;
+      --purple: #4b1d8c;
+      --ink: #1d1b3a;
+      --muted: #55536f;
+      --line: #e3e6ee;
+      --tint: #f3f8f7;
+      --brand-gradient: linear-gradient(90deg, var(--green), var(--blue) 55%, var(--purple));
+      --hex: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Outfit", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+      background: #fff;
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    .wrap { width: 100%; max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 88px 0; }
+    .tinted { background: var(--tint); }
+
+    h1 { font-size: clamp(2.1rem, 5.5vw, 3.4rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+    h2 { font-size: clamp(1.6rem, 3.6vw, 2.2rem); font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+    h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.3; }
+    .sub { margin-top: 12px; max-width: 58ch; color: var(--muted); font-size: 1.08rem; }
+
+    /* ---------- Hero ---------- */
+    .hero { padding: 56px 0 96px; text-align: center; }
+    .logo { width: min(240px, 58vw); height: auto; display: block; margin: 0 auto 4px; }
+    .hero .lead { margin: 18px auto 0; max-width: 54ch; font-size: clamp(1.05rem, 2.4vw, 1.25rem); color: var(--muted); }
+
+    .actions { display: grid; grid-template-columns: 1fr; gap: 18px; margin: 44px auto 0; max-width: 700px; }
+    @media (min-width: 640px) { .actions { grid-template-columns: 1fr 1fr; gap: 24px; } }
+
+    .btn {
+      position: relative; display: flex; align-items: center; justify-content: center;
+      min-height: 76px; padding: 0 40px; font-family: inherit; font-size: 1.3rem; font-weight: 600;
+      text-decoration: none;
+      clip-path: polygon(26px 0, calc(100% - 26px) 0, 100% 50%, calc(100% - 26px) 100%, 26px 100%, 0 50%);
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .btn span { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 12px; }
+    .btn svg { width: 24px; height: 24px; flex: none; }
+    .btn:hover { transform: translateY(-3px); }
+    .btn:active { transform: translateY(0); }
+    .btn-login { color: #fff; background: var(--brand-gradient); }
+    .btn-login:hover { filter: brightness(1.08); }
+    .btn-login:focus-visible { outline: none; box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 7px var(--ink); }
+    .btn-register { color: var(--purple); background: var(--brand-gradient); }
+    .btn-register::before {
+      content: ""; position: absolute; inset: 3px; background: #fff; transition: background .15s ease;
+      clip-path: polygon(23px 0, calc(100% - 23px) 0, 100% 50%, calc(100% - 23px) 100%, 23px 100%, 0 50%);
+    }
+    .btn-register:hover::before { background: #f1f5f6; }
+    .btn-register:focus-visible { outline: none; box-shadow: inset 0 0 0 7px var(--ink); }
+
+    .hero-facts { margin: 56px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 36px; color: var(--muted); font-weight: 500; }
+    .hero-facts li { list-style: none; display: flex; align-items: center; gap: 10px; }
+    .hex-dot { width: 14px; height: 16px; flex: none; clip-path: var(--hex); background: var(--brand-gradient); }
+
+    /* ---------- Roles ---------- */
+    .roles { margin-top: 44px; display: grid; gap: 24px; grid-template-columns: 1fr; }
+    @media (min-width: 820px) { .roles { grid-template-columns: repeat(3, 1fr); } }
+    .role { border: 1px solid var(--line); border-top-width: 6px; border-radius: 4px; padding: 28px 26px 30px; background: #fff; }
+    .role.employee { border-top-color: var(--green); }
+    .role.manager  { border-top-color: var(--blue); }
+    .role.hr       { border-top-color: var(--purple); }
+    .role p.who { margin-top: 6px; color: var(--muted); }
+    .role ul { margin-top: 18px; list-style: none; display: grid; gap: 10px; }
+    .role li { padding-left: 22px; position: relative; }
+    .role li::before { content: ""; position: absolute; left: 0; top: .5em; width: 9px; height: 10px; clip-path: var(--hex); background: currentColor; }
+    .employee li::before { color: var(--green); }
+    .manager li::before  { color: var(--blue); }
+    .hr li::before       { color: var(--purple); }
+
+    /* ---------- Leave types and rules ---------- */
+    .split { display: grid; gap: 48px; grid-template-columns: 1fr; align-items: start; }
+    @media (min-width: 860px) { .split { grid-template-columns: 1fr 1fr; gap: 72px; } }
+
+    .types { margin-top: 32px; display: grid; gap: 0; }
+    .type { display: grid; grid-template-columns: 8px 1fr; gap: 18px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+    .type:first-child { border-top: 1px solid var(--line); }
+    .type i { border-radius: 4px; }
+    .type:nth-child(1) i { background: var(--green); }
+    .type:nth-child(2) i { background: var(--blue); }
+    .type:nth-child(3) i { background: var(--purple); }
+    .type p { color: var(--muted); }
+
+    .rules { list-style: none; margin-top: 32px; display: grid; gap: 0; }
+    .rules li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+    .rules li:first-child { border-top: 1px solid var(--line); }
+    .rules .hex-dot { margin-top: 6px; }
+    .rules b { font-weight: 600; }
+    .rules span { display: block; color: var(--muted); font-size: .98rem; }
+
+    /* ---------- Conflict detection ---------- */
+    .dept { margin-top: 8px; padding: 32px; background: #fff; border: 1px solid var(--line); border-radius: 4px; }
+    .dept-title { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-weight: 600; }
+    .dept-title span { color: var(--muted); font-weight: 400; }
+    .team { margin-top: 24px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px 10px; justify-items: center; }
+    .person { width: 100%; max-width: 64px; aspect-ratio: 0.87; clip-path: var(--hex); background: #dfe5ee; display: grid; place-items: center; color: #8a92a6; font-size: .8rem; font-weight: 600; }
+    .person.away { background: var(--brand-gradient); color: #fff; }
+    .legend { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: .95rem; color: var(--muted); }
+    .legend li { list-style: none; display: flex; align-items: center; gap: 8px; }
+    .legend .hex-dot.off { background: #dfe5ee; }
+    .verdict { margin-top: 22px; padding: 16px 18px; border-left: 5px solid var(--purple); background: #f6f2fb; font-weight: 500; }
+
+    /* ---------- Steps ---------- */
+    .steps { margin-top: 44px; display: grid; gap: 28px; grid-template-columns: 1fr; counter-reset: step; }
+    @media (min-width: 820px) { .steps { grid-template-columns: repeat(4, 1fr); } }
+    .step { counter-increment: step; position: relative; padding-top: 64px; }
+    .step::before {
+      content: counter(step); position: absolute; top: 0; left: 0; width: 52px; height: 58px;
+      clip-path: var(--hex); background: var(--brand-gradient); color: #fff;
+      display: grid; place-items: center; font-weight: 700; font-size: 1.25rem;
+    }
+    .step p { margin-top: 6px; color: var(--muted); font-size: .98rem; }
+
+    /* ---------- Reports and security ---------- */
+    .checks { list-style: none; margin-top: 24px; display: grid; gap: 12px; }
+    .checks li { display: flex; gap: 12px; align-items: flex-start; }
+    .checks .hex-dot { margin-top: 7px; }
+
+    /* ---------- Closing CTA + footer ---------- */
+    .cta { text-align: center; }
+    .cta .actions { margin-top: 36px; }
+    footer { border-top: 1px solid var(--line); padding: 28px 0; color: var(--muted); font-size: .95rem; }
+    footer .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    footer img { width: 40px; height: auto; vertical-align: middle; margin-right: 10px; }
+
+    @media (max-width: 520px) { section { padding: 64px 0; } .dept { padding: 22px; } }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .btn, .btn-register::before { transition: none; }
+      .btn:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Hero ===== -->
+  <header class="hero">
+    <div class="wrap">
+      <img class="logo" src="{{ url_for('static', filename='LMS.jpg') }}" alt="LMS logo">
+      <h1>Smart Leave Management System</h1>
+      <p class="lead">Replace paper forms and email chains. Apply for leave, get it reviewed, and see your balance, with conflicts and rules checked for you.</p>
+
+      <nav class="actions" aria-label="Get started">
+        <a class="btn btn-login" href="{{ url_for('login') }}">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+            Login
+          </span>
+        </a>
+        <a class="btn btn-register" href="{{ url_for('signup') }}">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+            Register
+          </span>
+        </a>
+      </nav>
+
+      <ul class="hero-facts">
+        <li><i class="hex-dot"></i>Employee, Manager and HR logins</li>
+        <li><i class="hex-dot"></i>Automatic balance calculation</li>
+        <li><i class="hex-dot"></i>Department conflict detection</li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ===== Roles ===== -->
+  <section>
+    <div class="wrap">
+      <h2>One system, three roles</h2>
+      <p class="sub">Each person signs in with their own login and sees only what they need to do their job.</p>
+
+      <div class="roles">
+        <article class="role employee">
+          <h3>Employee</h3>
+          <p class="who">Request time off and keep track of it.</p>
+          <ul>
+            <li>Apply for leave, including half-day leave</li>
+            <li>Cancel a leave request</li>
+            <li>View your leave history</li>
+            <li>Check your remaining casual, sick and earned leave</li>
+          </ul>
+        </article>
+
+        <article class="role manager">
+          <h3>Manager</h3>
+          <p class="who">Review requests from your team.</p>
+          <ul>
+            <li>Approve or reject leave requests</li>
+            <li>Add comments to every decision</li>
+            <li>Cannot approve their own leave</li>
+          </ul>
+        </article>
+
+        <article class="role hr">
+          <h3>HR</h3>
+          <p class="who">Manage people, policy and reporting.</p>
+          <ul>
+            <li>Add and delete employees</li>
+            <li>Assign managers</li>
+            <li>Configure leave policies</li>
+            <li>Generate leave reports</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Leave types and rules ===== -->
+  <section class="tinted">
+    <div class="wrap split">
+      <div>
+        <h2>Three leave types for every employee</h2>
+        <p class="sub">Balances are calculated automatically and update as soon as a request is approved or cancelled.</p>
+        <div class="types">
+          <div class="type"><i></i><div><h3>Casual leave</h3><p>For personal errands and short breaks. Limited to 3 per month.</p></div></div>
+          <div class="type"><i></i><div><h3>Sick leave</h3><p>For when you are unwell. Apply at any time, with no notice needed.</p></div></div>
+          <div class="type"><i></i><div><h3>Earned leave</h3><p>For planned time off. Apply at least 7 days in advance.</p></div></div>
+        </div>
+      </div>
+
+      <div>
+        <h2>Leave rules, applied for you</h2>
+        <p class="sub">The system checks every request against company policy before it reaches your manager.</p>
+        <ul class="rules">
+          <li><i class="hex-dot"></i><div><b>Maximum 3 casual leaves in a month</b><span>Requests beyond the monthly limit are rejected.</span></div></li>
+          <li><i class="hex-dot"></i><div><b>Sick leave can be applied anytime</b><span>No notice period is required.</span></div></li>
+          <li><i class="hex-dot"></i><div><b>Earned leave needs 7 days' notice</b><span>Short-notice earned leave is not accepted.</span></div></li>
+          <li><i class="hex-dot"></i><div><b>Half-day leave is supported</b><span>A half day deducts only half a day from your balance.</span></div></li>
+          <li><i class="hex-dot"></i><div><b>Weekends are not counted</b><span>Saturdays and Sundays do not use up your leave.</span></div></li>
+          <li><i class="hex-dot"></i><div><b>Public holidays are not counted</b><span>Holidays in your range are skipped automatically.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Conflict detection ===== -->
+  <section>
+    <div class="wrap split">
+      <div>
+        <h2>No more empty departments</h2>
+        <p class="sub">If employees in the same department are already on leave and 30% of the department is away, the next request is rejected automatically. Your team stays covered without anyone having to check a calendar.</p>
+        <p class="verdict">Example: in a department of 10, three people on leave reaches the 30% limit, so a fourth request for the same dates is rejected.</p>
+      </div>
+
+      <div class="dept" role="img" aria-label="A department of 10 people, 3 of them on leave, which is 30 percent">
+        <div class="dept-title">Sales department <span>10 employees</span></div>
+        <div class="team" aria-hidden="true">
+          <div class="person away">A</div><div class="person away">B</div><div class="person away">C</div>
+          <div class="person">D</div><div class="person">E</div>
+          <div class="person">F</div><div class="person">G</div><div class="person">H</div><div class="person">I</div><div class="person">J</div>
+        </div>
+        <ul class="legend">
+          <li><i class="hex-dot"></i>On leave (3 of 10 = 30%)</li>
+          <li><i class="hex-dot off"></i>Available</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== How it works ===== -->
+  <section class="tinted">
+    <div class="wrap">
+      <h2>How a leave request works</h2>
+      <p class="sub">From application to decision, the checking is done before a manager ever sees the request.</p>
+
+      <div class="steps">
+        <div class="step"><h3>Apply</h3><p>Choose the leave type, the dates, and full or half day.</p></div>
+        <div class="step"><h3>Rules and conflicts checked</h3><p>Notice period, monthly limits, weekends, holidays and department cover are checked instantly.</p></div>
+        <div class="step"><h3>Manager decides</h3><p>Your manager approves or rejects the request and adds a comment.</p></div>
+        <div class="step"><h3>Balance updates</h3><p>Your remaining leave is recalculated and the request appears in your history.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Reports and security ===== -->
+  <section>
+    <div class="wrap split">
+      <div>
+        <h2>Reports that answer real questions</h2>
+        <p class="sub">HR can see who is away, where, and how much leave is left.</p>
+        <ul class="checks">
+          <li><i class="hex-dot"></i><span><b>Monthly leave report</b> for all leave taken in a month</span></li>
+          <li><i class="hex-dot"></i><span><b>Department-wise report</b> to compare teams</span></li>
+          <li><i class="hex-dot"></i><span><b>Most absent employee</b> to spot patterns early</span></li>
+          <li><i class="hex-dot"></i><span><b>Remaining leave balance</b> for every employee</span></li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>Secure sign-in</h2>
+        <p class="sub">Your account and your leave data stay protected.</p>
+        <ul class="checks">
+          <li><i class="hex-dot"></i><span><b>Separate logins</b> for employees, managers and HR</span></li>
+          <li><i class="hex-dot"></i><span><b>Hashed passwords</b>, so they are never stored as plain text</span></li>
+          <li><i class="hex-dot"></i><span><b>Session management</b> keeps you signed in safely and signs you out when you leave</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Closing call to action ===== -->
+  <section class="tinted cta">
+    <div class="wrap">
+      <h2>Ready to manage your leave?</h2>
+      <p class="sub" style="margin-left:auto;margin-right:auto;">Log in if you already have an account, or register to get started.</p>
+      <nav class="actions" aria-label="Get started">
+        <a class="btn btn-login" href="{{ url_for('login') }}"><span>Login</span></a>
+        <a class="btn btn-register" href="{{ url_for('signup') }}"><span>Register</span></a>
+      </nav>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div><img src="{{ url_for('static', filename='LMS.jpg') }}" alt="">Smart Leave Management System</div>
+      <div>Built for fair, fast and transparent leave approval.</div>
+    </div>
+  </footer>
+
+</body>
+</html>

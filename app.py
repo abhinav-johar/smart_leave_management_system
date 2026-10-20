@@ -459,7 +459,14 @@ def signup():
 
     return render_template('signup.html', form=form)
 
+
+
 @app.route('/', methods=['GET', 'POST'])
+def home():
+    return render_template('home.html')
+     
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'employeeid' in session:
         pos = session.get('position')
@@ -1743,6 +1750,10 @@ def remaining_manager_leaves():
 
 
  
-
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(
+        host="127.0.0.1",
+        port=5000,
+        debug=False,
+        ssl_context=("localhost.pem", "localhost-key.pem")
+    )
